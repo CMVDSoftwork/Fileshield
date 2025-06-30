@@ -1,80 +1,110 @@
 package org.CMVD.Softwork.Vistas;
 
 import com.kitfox.svg.SVGDiagram;
-import com.kitfox.svg.SVGUniverse;
-
+import org.CMVD.Softwork.DTO.ArchivoDTO;
+import org.CMVD.Softwork.DTO.Usuario.SesionActiva;
+import org.CMVD.Softwork.Service.ArchivoService;
+import org.CMVD.Softwork.Util.FuenteUtil;
+import org.CMVD.Softwork.Util.HoverEffectUtil;
+import org.CMVD.Softwork.Util.RoundedBorder;
+import org.CMVD.Softwork.Util.SVGIconLoader;
+import org.CMVD.Softwork.Vistas.Archivo.VistaArchivoUI;
+import org.CMVD.Softwork.Vistas.CarpetaMonitorizada.CarpetaMonitorizadaUI;
+import org.CMVD.Softwork.Vistas.CarpetaMonitorizada.VistaCarpetaUI;
+import org.CMVD.Softwork.Vistas.Correo.CorreoRecientesPanel;
+import org.CMVD.Softwork.Vistas.Correo.EnviarCorreoUI;
+import org.CMVD.Softwork.Vistas.Usuario.Login;
+import org.CMVD.Softwork.Vistas.Correo.VerClaveCorreoUI;
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.awt.*;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.Objects;
+import java.io.IOException;
 
 public class HomeUI {
+
+    private JFrame frame;
+    private JPanel panelDinamico;
+    private int menuWidth;
+    private int width;
+    private int height;
 
     public HomeUI() {
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension screenSize = toolkit.getScreenSize();
-        int width = screenSize.width;
-        int height = screenSize.height;
+        width = screenSize.width;
+        height = screenSize.height;
 
-        JFrame frame = new JFrame("FileShield - Home");
+        frame = new JFrame("FileShield - Home");
         frame.setSize(width, height);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setLayout(null);
-        frame.getContentPane().setBackground(new Color(20, 20, 40));
 
-        Font orbitron = null;
-        try {
-            orbitron = Font.createFont(Font.TRUETYPE_FONT,
-                            Objects.requireNonNull(getClass().getResourceAsStream("/Orbitron-Bold.ttf")))
-                    .deriveFont(18f);
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(orbitron);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        JPanel fondoPanel = new JPanel(null) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        int menuWidth = (int) (width * 0.15);
+                LinearGradientPaint fondoGradient = new LinearGradientPaint(
+                        0, 0, getWidth(), getHeight(),
+                        new float[]{0f, 0.6f, 0.8f, 1f},
+                        new Color[]{
+                                new Color(0x01025E),
+                                new Color(0x00F111A),
+                                new Color(0x040446),
+                                new Color(0x00F111A)
+                        }
+                );
+
+                g2d.setPaint(fondoGradient);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+                g2d.dispose();
+            }
+        };
+        fondoPanel.setBounds(0, 0, width, height);
+        frame.setContentPane(fondoPanel);
+
+        menuWidth = (int) (width * 0.21);
+
         JPanel panelMenu = new JPanel(null) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
-                GradientPaint gradient = new GradientPaint(
-                        0, 0, new Color(25, 25, 50),
-                        0, getHeight(), new Color(10, 10, 30)
+                LinearGradientPaint gradient = new LinearGradientPaint(
+                        0, 0, 0, getHeight(),
+                        new float[]{0f, 0.35f, 0.8f},
+                        new Color[]{
+                                new Color(0x050A30),
+                                new Color(0x06165F),
+                                new Color(0x050A30),
+                        },
+                        MultipleGradientPaint.CycleMethod.NO_CYCLE
                 );
                 g2d.setPaint(gradient);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
             }
         };
         panelMenu.setBounds(0, 0, menuWidth, height);
+        fondoPanel.add(panelMenu);
 
-        SVGUniverse svgUniverse = new SVGUniverse();
-        SVGDiagram svgDiagram = null;
-        try {
-            InputStream svgStream = getClass().getResourceAsStream("/Logo.svg");
-            URI svgUri = svgUniverse.loadSVG(svgStream, "logo");
-            svgDiagram = svgUniverse.getDiagram(svgUri);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        SVGDiagram finalSvgDiagram = svgDiagram;
+        SVGDiagram logoDiagram = SVGIconLoader.cargarSVGDiagram(getClass(), "/Logo.svg");
 
         JPanel logoPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                if (finalSvgDiagram != null) {
+                if (logoDiagram != null) {
                     Graphics2D g2d = (Graphics2D) g.create();
                     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    float scaleX = getWidth() / (float) finalSvgDiagram.getWidth();
-                    float scaleY = getHeight() / (float) finalSvgDiagram.getHeight();
+                    float scaleX = getWidth() / (float) logoDiagram.getWidth();
+                    float scaleY = getHeight() / (float) logoDiagram.getHeight();
                     g2d.scale(scaleX, scaleY);
                     try {
-                        finalSvgDiagram.render(g2d);
+                        logoDiagram.render(g2d);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -83,115 +113,280 @@ public class HomeUI {
             }
         };
         logoPanel.setOpaque(false);
-        logoPanel.setBounds((menuWidth - 172) / 2, 50, 172, 64);
+        logoPanel.setBounds((menuWidth - 172) / 2, 80, 172, 64);
         panelMenu.add(logoPanel);
 
-        String[] opciones = {
-                "🏠 Home",
-                "📂 Carpetas",
-                "🔐 Archivos cifrados",
-                "✉️ Control de correos",
-                "🔓 Descifrar archivos",
-                "⏻ Logout"
+        JPanel panelContenidoPrincipal = new JPanel(null);
+        panelContenidoPrincipal.setBounds(menuWidth, 0, width - menuWidth, height);
+        panelContenidoPrincipal.setOpaque(false);
+        fondoPanel.add(panelContenidoPrincipal);
+
+        JPanel panelFijoArriba = new JPanel(null);
+        panelFijoArriba.setBounds(0, 0, panelContenidoPrincipal.getWidth(), 100);
+        panelFijoArriba.setOpaque(false);
+        panelContenidoPrincipal.add(panelFijoArriba);
+
+        JLabel labelSaludo = new JLabel("HI " + SesionActiva.getNombre());
+        labelSaludo.setBounds(40, 30, 300, 30);
+        labelSaludo.setForeground(Color.WHITE);
+        labelSaludo.setFont(FuenteUtil.cargarOrbitronBold(20f));
+        panelFijoArriba.add(labelSaludo);
+
+        JTextField txtBuscar = new JTextField();
+        txtBuscar.setBounds(panelFijoArriba.getWidth() - 440, 30, 300, 25);
+        txtBuscar.setOpaque(false);
+        txtBuscar.setForeground(new Color(0xC4D0FF));
+        txtBuscar.setCaretColor(Color.WHITE);
+        txtBuscar.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(0xC4D0FF)));
+        panelFijoArriba.add(txtBuscar);
+
+        JButton btnBuscar = new JButton(SVGIconLoader.cargarSVGIcon(getClass(), "/Icons/Lupa.svg", 20, 20));
+        btnBuscar.setBounds(panelFijoArriba.getWidth() - 120, 25, 38, 35);
+        btnBuscar.setFocusPainted(false);
+        btnBuscar.setContentAreaFilled(false);
+        btnBuscar.setBorderPainted(false);
+        btnBuscar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        panelFijoArriba.add(btnBuscar);
+
+        JButton btnPerfil = new JButton(SVGIconLoader.cargarSVGIcon(getClass(), "/Icons/user.svg", 20, 20));
+        btnPerfil.setBounds(panelFijoArriba.getWidth() - 70, 25, 40, 35);
+        btnPerfil.setFocusPainted(false);
+        btnPerfil.setContentAreaFilled(false);
+        btnPerfil.setBorderPainted(false);
+        btnPerfil.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        panelFijoArriba.add(btnPerfil);
+
+        JPanel lineaNeon = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int thickness = 3;
+                int glowSize = 10;
+                Color neonColor = Color.WHITE;
+
+                g2d.setComposite(AlphaComposite.SrcOver.derive(0.9f));
+                g2d.setColor(neonColor);
+                g2d.fillRect(0, (getHeight() - thickness) / 2, getWidth(), thickness);
+
+                for (int i = 1; i <= glowSize; i++) {
+                    float alpha = 0.3f / i;
+                    g2d.setComposite(AlphaComposite.SrcOver.derive(alpha));
+                    int y = (getHeight() - thickness) / 2 - i;
+                    int heightGlow = thickness + i * 2;
+                    g2d.fillRect(0, y, getWidth(), heightGlow);
+                }
+                g2d.dispose();
+            }
+
         };
-        int inicioY = 150;
-        for (int i = 0; i < opciones.length; i++) {
-            JButton btn = new JButton(opciones[i]);
-            btn.setBounds(10, inicioY + i * 60, menuWidth - 20, 40);
-            btn.setBackground(new Color(40, 40, 70));
+        lineaNeon.setOpaque(false);
+        lineaNeon.setBounds(30, 95, width - menuWidth - 60, 12);
+        panelFijoArriba.add(lineaNeon);
+
+        panelDinamico = new JPanel(null);
+        panelDinamico.setBounds(0, 105, panelContenidoPrincipal.getWidth(), panelContenidoPrincipal.getHeight() - 100);
+        panelDinamico.setOpaque(false);
+        panelContenidoPrincipal.add(panelDinamico);
+
+        cargarPanelHome(panelDinamico, width, menuWidth);
+
+        String[] textos = {"Home", "Carpetas", "Archivos cifrados", "Ver clave correo", "Logout"};
+        String[] iconPaths = {"/Icons/Home.svg", "/Icons/Carpetas.svg", "/Icons/Candado.svg", "/Icons/Correo.svg", "/Icons/Logout.svg"};
+
+        int inicioY = 250;
+        int iconSize = 24;
+
+        for (int i = 0; i < textos.length; i++) {
+            JButton btn = new JButton(textos[i]);
+            btn.setBounds(40, inicioY + i * 60, menuWidth - 80, 40);
             btn.setForeground(Color.WHITE);
             btn.setFocusPainted(false);
-            btn.setFont(orbitron);
+            btn.setFont(FuenteUtil.cargarOrbitron(16f));
+            btn.setBorderPainted(false);
+            btn.setContentAreaFilled(false);
+            btn.setOpaque(false);
+            btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+            ImageIcon svgIcon = SVGIconLoader.cargarSVGIcon(getClass(), iconPaths[i], iconSize, iconSize);
+            if (svgIcon != null) {
+                btn.setIcon(svgIcon);
+                btn.setHorizontalAlignment(SwingConstants.LEFT);
+                btn.setIconTextGap(10);
+            }
+            HoverEffectUtil.agregarHoverConAnimacion(btn);
+
+            switch (textos[i]) {
+                case "Home":
+                    btn.addActionListener(e -> cargarPanelHome(panelDinamico, width, menuWidth));
+                    break;
+                case "Carpetas":
+                    btn.addActionListener(e -> {
+                        panelDinamico.removeAll();
+                        panelDinamico.revalidate();
+                        panelDinamico.repaint();
+                        VistaCarpetaUI vista = new VistaCarpetaUI(panelDinamico);
+                        vista.mostrar();
+                    });
+                    break;
+
+                case "Archivos cifrados":
+                    btn.addActionListener(e -> {
+                        panelDinamico.removeAll();
+                        panelDinamico.revalidate();
+                        panelDinamico.repaint();
+                        VistaArchivoUI vista = new VistaArchivoUI(panelDinamico);
+                        vista.mostrar();
+                    });
+                    break;
+
+                case "Ver clave correo":
+                    btn.addActionListener(e -> {
+                        panelDinamico.removeAll();
+                        VerClaveCorreoUI verClaveUIInstance = new VerClaveCorreoUI();
+                        JPanel verClavePanel = verClaveUIInstance.getPanel();
+                        verClavePanel.setBounds(0, 0, panelDinamico.getWidth(), panelDinamico.getHeight());
+                        panelDinamico.add(verClavePanel);
+                        panelDinamico.revalidate();
+                        panelDinamico.repaint();
+                    });
+                    break;
+                case "Logout":
+                    btn.addActionListener(e -> {
+                        SesionActiva.cerrarSesion();
+                        System.out.println("Sesión cerrada localmente. Datos de sesión eliminados.");
+
+                        frame.dispose();
+                        new Login();
+                    });
+                    break;
+            }
+
             panelMenu.add(btn);
         }
 
-        JLabel labelSaludo = new JLabel("HI MAYLISS");
-        labelSaludo.setBounds(menuWidth + 20, 20, 300, 30);
-        labelSaludo.setForeground(Color.WHITE);
-        if (orbitron != null) labelSaludo.setFont(orbitron);
+        frame.setVisible(true);
+    }
 
-        int searchWidth = 300;
-        JTextField txtBuscar = new JTextField();
-        txtBuscar.setBounds(width - searchWidth - 140, 25, searchWidth, 25);
-        JButton btnBuscar = new JButton("🔍");
-        btnBuscar.setBounds(width - 130, 25, 40, 25);
-        JButton btnPerfil = new JButton("👤");
-        btnPerfil.setBounds(width - 80, 25, 40, 25);
+    private void cargarPanelHome(JPanel panelDinamico, int width, int menuWidth) {
+        panelDinamico.removeAll();
 
-        int panelArchivosX = menuWidth + 20;
-        int panelArchivosY = 80;
-        int panelArchivosWidth = (int) (width * 0.18);
-        int panelArchivosHeight = 300;
         JPanel panelArchivos = new JPanel(null);
-        panelArchivos.setBounds(panelArchivosX, panelArchivosY, panelArchivosWidth, panelArchivosHeight);
-        panelArchivos.setBackground(new Color(30, 30, 60));
+        panelArchivos.setBounds(80, 50, (int) (width * 0.35), 300);
+        panelArchivos.setBackground(new Color(0x0D1030));
+        panelArchivos.setBorder(BorderFactory.createLineBorder(new Color(0x1E90FF), 1));
 
-        JLabel labelUltimos = new JLabel("ÚLTIMOS ARCHIVOS");
+
+        JLabel labelUltimos = new JLabel("ARCHIVOS CIFRADOS");
         labelUltimos.setForeground(Color.WHITE);
-        labelUltimos.setBounds(20, 10, 200, 20);
-        if (orbitron != null) labelUltimos.setFont(orbitron);
+        labelUltimos.setFont(FuenteUtil.cargarOrbitron(18f));
+        labelUltimos.setBounds(150, 30, 250, 20);
         panelArchivos.add(labelUltimos);
 
-        for (int i = 0; i < 3; i++) {
-            JLabel archivo = new JLabel("📁 Archivo reciente");
-            archivo.setForeground(Color.WHITE);
-            archivo.setBounds(20, 40 + i * 50, 180, 20);
-            if (orbitron != null) archivo.setFont(orbitron.deriveFont(14f));
-            panelArchivos.add(archivo);
+        List<ArchivoDTO> archivos = new ArrayList<>();
+        try {
+            ArchivoService archivoService = new ArchivoService();
+            archivos = archivoService.obtenerTodosLosArchivos();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            JLabel errorLabel = new JLabel("Error al cargar archivos");
+            errorLabel.setForeground(new Color(0xFF6B6B));
+            errorLabel.setFont(FuenteUtil.cargarOrbitron(14f));
+            errorLabel.setBounds(50, 100, 250, 20);
+            panelArchivos.add(errorLabel);
         }
 
-        int botonesY = panelArchivosY;
+        if (!archivos.isEmpty()) {
+            int limite = Math.min(archivos.size(), 5);
+            for (int i = 0; i < limite; i++) {
+                ArchivoDTO archivo = archivos.get(i);
+                String textoArchivo = archivo.getNombreArchivo();
+                JLabel lblArchivo = new JLabel("📄 " + textoArchivo);
+                lblArchivo.setForeground(Color.WHITE);
+                lblArchivo.setFont(FuenteUtil.cargarOrbitron(14f));
+                lblArchivo.setBounds(50, 100 + i * 50, 300, 20);
+                panelArchivos.add(lblArchivo);
+            }
+        } else {
+            JLabel sinArchivos = new JLabel("No hay archivos cifrados");
+            sinArchivos.setForeground(new Color(0xC4D0FF));
+            sinArchivos.setFont(FuenteUtil.cargarOrbitron(14f));
+            sinArchivos.setBounds(50, 100, 250, 20);
+            panelArchivos.add(sinArchivos);
+        }
+
+        panelDinamico.add(panelArchivos);
+
         JButton btnSeleccionar = new JButton("Seleccionar carpeta");
-        btnSeleccionar.setBounds(panelArchivosX + panelArchivosWidth + 30, botonesY, 200, 40);
+        btnSeleccionar.setBounds(panelArchivos.getX() + panelArchivos.getWidth() + 80, 70, 200, 40);
+        btnSeleccionar.setFont(FuenteUtil.cargarOrbitron(14f));
+        btnSeleccionar.setForeground(Color.WHITE);
+        btnSeleccionar.setBackground(new Color(0x040446));
+        btnSeleccionar.setFocusPainted(false);
+        btnSeleccionar.setBorder(new RoundedBorder(15));
+        btnSeleccionar.setContentAreaFilled(false);
+        btnSeleccionar.setOpaque(true);
+        btnSeleccionar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnSeleccionar.addActionListener(e -> new CarpetaMonitorizadaUI());
+        panelDinamico.add(btnSeleccionar);
 
         JButton btnCorreo = new JButton("Enviar correo/mensaje");
-        btnCorreo.setBounds(btnSeleccionar.getX() + 220, botonesY, 220, 40);
+        btnCorreo.setBounds(btnSeleccionar.getX() + 220, 70, 220, 40);
+        btnCorreo.setFont(FuenteUtil.cargarOrbitron(14f));
+        btnCorreo.setForeground(Color.WHITE);
+        btnCorreo.setBackground(new Color(0x040446));
+        btnCorreo.setFocusPainted(false);
+        btnCorreo.setBorder(new RoundedBorder(15));
+        btnCorreo.setContentAreaFilled(false);
+        btnCorreo.setOpaque(true);
+        btnCorreo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnCorreo.addActionListener(e -> new EnviarCorreoUI());
+        panelDinamico.add(btnCorreo);
 
-        // Imagen de robot bien escalada y separada
-        int robotWidth = 433;
-        int robotHeight = 229;
-        JLabel robotLabel = null;
+        SVGDiagram svgRobotDiagram = SVGIconLoader.cargarSVGDiagram(getClass(), "/Robot.svg");
+        HoverEffectUtil.FloatWrapper scale = new HoverEffectUtil.FloatWrapper(1.0f);
 
-        try {
-            ImageIcon icon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/Robot.png")));
-            Image img = icon.getImage().getScaledInstance(robotWidth, robotHeight, Image.SCALE_SMOOTH);
-            robotLabel = new JLabel(new ImageIcon(img));
-            robotLabel.setBounds(btnSeleccionar.getX(), botonesY + 70, robotWidth, robotHeight);
-            frame.add(robotLabel);
-        } catch (Exception e) {
-            System.out.println("No se pudo cargar la imagen del robot: " + e.getMessage());
-        }
-
-        int correosY = botonesY + 70 + robotHeight + 30;
-        JPanel panelCorreos = new JPanel(null);
-        panelCorreos.setBounds(btnSeleccionar.getX(), correosY, 500, 150);
-        panelCorreos.setBackground(new Color(30, 30, 60));
-
-        String[] mensajes = {
-                "📅 26 Abril | PLAN ESTRATÉGICO EMPRESA",
-                "📅 26 Abril | MINUTAS DE LA REUNIÓN",
-                "📅 26 Abril | BORRADOR NUEVA VERSIÓN DEL LANZAMIENTO"
+        JPanel robotPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g.create();
+                float cx = getWidth() / 2f;
+                float cy = getHeight() / 2f;
+                g2d.translate(cx, cy);
+                g2d.scale(scale.value, scale.value);
+                g2d.translate(-cx, -cy);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                if (svgRobotDiagram != null) {
+                    try {
+                        svgRobotDiagram.render(g2d);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                g2d.dispose();
+            }
         };
+        robotPanel.setOpaque(false);
+        robotPanel.setBounds(panelArchivos.getX() + panelArchivos.getWidth() + 25, 150, 550, 230);
+        robotPanel.addMouseListener(HoverEffectUtil.crearHoverConAnimacionTransform(1.05f, 16, 0.15f, scale));
+        panelDinamico.add(robotPanel);
 
-        for (int i = 0; i < mensajes.length; i++) {
-            JLabel label = new JLabel(mensajes[i]);
-            label.setForeground(Color.WHITE);
-            label.setBounds(20, 10 + i * 40, 460, 30);
-            if (orbitron != null) label.setFont(orbitron.deriveFont(14f));
-            panelCorreos.add(label);
-        }
 
-        frame.add(panelMenu);
-        frame.add(labelSaludo);
-        frame.add(txtBuscar);
-        frame.add(btnBuscar);
-        frame.add(btnPerfil);
-        frame.add(panelArchivos);
-        frame.add(btnSeleccionar);
-        frame.add(btnCorreo);
-        if (robotLabel != null) frame.add(robotLabel);
-        frame.add(panelCorreos);
+        CorreoRecientesPanel correosRecientesUIInstance = new CorreoRecientesPanel();
+        JPanel correosPanel = correosRecientesUIInstance.getPanel();
 
-        frame.setVisible(true);
+        int correosPanelY = Math.max(panelArchivos.getY() + panelArchivos.getHeight(), robotPanel.getY() + robotPanel.getHeight()) + 30;
+        int correosPanelX = 80;
+        int correosPanelWidth = panelDinamico.getWidth() - (correosPanelX * 2);
+        int correosPanelHeight = panelDinamico.getHeight() - correosPanelY - 90;
+
+        correosPanel.setBounds(correosPanelX, correosPanelY, correosPanelWidth, correosPanelHeight);
+        panelDinamico.add(correosPanel);
+
+        panelDinamico.revalidate();
+        panelDinamico.repaint();
     }
 }
