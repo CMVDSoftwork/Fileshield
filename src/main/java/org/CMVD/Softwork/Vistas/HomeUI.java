@@ -132,30 +132,6 @@ public class HomeUI {
         labelSaludo.setFont(FuenteUtil.cargarOrbitronBold(20f));
         panelFijoArriba.add(labelSaludo);
 
-        JTextField txtBuscar = new JTextField();
-        txtBuscar.setBounds(panelFijoArriba.getWidth() - 440, 30, 300, 25);
-        txtBuscar.setOpaque(false);
-        txtBuscar.setForeground(new Color(0xC4D0FF));
-        txtBuscar.setCaretColor(Color.WHITE);
-        txtBuscar.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(0xC4D0FF)));
-        panelFijoArriba.add(txtBuscar);
-
-        JButton btnBuscar = new JButton(SVGIconLoader.cargarSVGIcon(getClass(), "/Icons/Lupa.svg", 20, 20));
-        btnBuscar.setBounds(panelFijoArriba.getWidth() - 120, 25, 38, 35);
-        btnBuscar.setFocusPainted(false);
-        btnBuscar.setContentAreaFilled(false);
-        btnBuscar.setBorderPainted(false);
-        btnBuscar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        panelFijoArriba.add(btnBuscar);
-
-        JButton btnPerfil = new JButton(SVGIconLoader.cargarSVGIcon(getClass(), "/Icons/user.svg", 20, 20));
-        btnPerfil.setBounds(panelFijoArriba.getWidth() - 70, 25, 40, 35);
-        btnPerfil.setFocusPainted(false);
-        btnPerfil.setContentAreaFilled(false);
-        btnPerfil.setBorderPainted(false);
-        btnPerfil.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        panelFijoArriba.add(btnPerfil);
-
         JPanel lineaNeon = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
