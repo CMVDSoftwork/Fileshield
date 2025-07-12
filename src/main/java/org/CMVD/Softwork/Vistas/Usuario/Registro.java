@@ -1,6 +1,9 @@
 package org.CMVD.Softwork.Vistas.Usuario;
 
 import com.kitfox.svg.SVGDiagram;
+import org.CMVD.Softwork.DTO.Usuario.LoginResponse;
+import org.CMVD.Softwork.DTO.Usuario.SesionActiva;
+import org.CMVD.Softwork.DTO.Usuario.UsuarioDTO;
 import org.CMVD.Softwork.Service.AuthService;
 import org.CMVD.Softwork.Util.FuenteUtil;
 import org.CMVD.Softwork.Util.SVGIconLoader;
@@ -173,7 +176,7 @@ public class Registro {
         JTextField campo = new JTextField();
         campo.setBounds(200, y, 200, 25);
         campo.setBackground(COLOR_CAMPO);
-        campo.setFont(FuenteUtil.cargarOrbitron(12f));  // Plain 12f
+        campo.setFont(FuenteUtil.cargarOrbitron(12f));
         panel.add(label);
         panel.add(campo);
         return campo;
@@ -182,12 +185,12 @@ public class Registro {
     private JPasswordField crearCampoPassword(JPanel panel, String texto, int y) {
         JLabel label = new JLabel(texto);
         label.setForeground(COLOR_TEXTO);
-        label.setFont(FuenteUtil.cargarOrbitron(12f));  // Plain 12f
+        label.setFont(FuenteUtil.cargarOrbitron(12f));
         label.setBounds(50, y, 150, 20);
         JPasswordField campo = new JPasswordField();
         campo.setBounds(200, y, 200, 25);
         campo.setBackground(COLOR_CAMPO);
-        campo.setFont(FuenteUtil.cargarOrbitron(12f));  // Plain 12f
+        campo.setFont(FuenteUtil.cargarOrbitron(12f));
         panel.add(label);
         panel.add(campo);
         return campo;
@@ -219,21 +222,33 @@ public class Registro {
 
         new Thread(() -> {
             try {
-                boolean exito = authService.registrar(nombre, apellidoP, apellidoM, correo, contrasena).get();
+                LoginResponse response = authService.registrar(nombre, apellidoP, apellidoM, correo, contrasena).get();
                 SwingUtilities.invokeLater(() -> {
-                    if (exito) {
+                    if (response != null) {
                         mostrarAlerta("Éxito", "Registro exitoso.", JOptionPane.INFORMATION_MESSAGE);
+
+                        SesionActiva.iniciarSesion(
+                                response.getToken(),
+                                response.getCorreo(),
+                                response.getNombre(),
+                                response.getIdUsuario(),
+                                response.getClaveCifDesPersonal()
+                        );
+                        System.out.println("Sesión activa inicializada para: " + SesionActiva.getNombre() + " (ID: " + SesionActiva.getIdUsuario() + ")");
+
                         new HomeUI();
                         JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(btnRegistrar);
                         if (topFrame != null) topFrame.dispose();
                     } else {
-                        mostrarAlerta("Error", "El correo ya está registrado.", JOptionPane.ERROR_MESSAGE);
+                        mostrarAlerta("Error", "Ocurrió un error inesperado durante el registro.", JOptionPane.ERROR_MESSAGE);
                     }
                 });
             } catch (Exception ex) {
+                String errorMessage = (ex.getCause() != null) ? ex.getCause().getMessage() : ex.getMessage();
                 SwingUtilities.invokeLater(() ->
-                        mostrarAlerta("Error", "Error en el servidor", JOptionPane.ERROR_MESSAGE)
+                        mostrarAlerta("Error", "Error en el registro: " + errorMessage, JOptionPane.ERROR_MESSAGE)
                 );
+                ex.printStackTrace();
             }
         }).start();
     }

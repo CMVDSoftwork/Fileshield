@@ -3,7 +3,9 @@ package org.CMVD.Softwork.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.CMVD.Softwork.DTO.Usuario.LoginResponse;
 import org.CMVD.Softwork.DTO.Usuario.SesionActiva;
+import org.CMVD.Softwork.DTO.Usuario.UsuarioDTO;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -16,7 +18,7 @@ public class AuthService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final String BASE_URL = "http://localhost:8080/api/auth";
 
-    public CompletableFuture<Boolean> registrar(String nombre, String apellidoP, String apellidoM, String correo, String contrasena) {
+    public CompletableFuture<LoginResponse> registrar(String nombre, String apellidoP, String apellidoM, String correo, String contrasena) {
         String jsonBody = String.format("""
                 {
                     "nombre": "%s",
@@ -34,7 +36,20 @@ public class AuthService {
                 .build();
 
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenApply(response -> response.statusCode() == 200);
+                .thenApply(response -> {
+                    if (response.statusCode() == 200) {
+                        try {
+                            return objectMapper.readValue(response.body(), LoginResponse.class);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            throw new RuntimeException("Error al procesar la respuesta del servidor de registro: " + e.getMessage(), e);
+                        }
+                    } else {
+                        String errorBody = response.body();
+                        System.err.println("Error en el registro (Status " + response.statusCode() + "): " + errorBody);
+                        throw new RuntimeException("Fallo en el registro: " + errorBody);
+                    }
+                });
     }
 
     public CompletableFuture<Void> login(String correo, String contrasena) {

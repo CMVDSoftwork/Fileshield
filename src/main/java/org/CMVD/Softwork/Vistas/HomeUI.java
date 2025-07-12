@@ -3,6 +3,7 @@ package org.CMVD.Softwork.Vistas;
 import com.kitfox.svg.SVGDiagram;
 import org.CMVD.Softwork.DTO.ArchivoDTO;
 import org.CMVD.Softwork.DTO.Usuario.SesionActiva;
+import org.CMVD.Softwork.DTO.Usuario.UsuarioDTO;
 import org.CMVD.Softwork.Service.ArchivoService;
 import org.CMVD.Softwork.Util.FuenteUtil;
 import org.CMVD.Softwork.Util.HoverEffectUtil;
@@ -126,10 +127,16 @@ public class HomeUI {
         panelFijoArriba.setOpaque(false);
         panelContenidoPrincipal.add(panelFijoArriba);
 
-        JLabel labelSaludo = new JLabel("HI " + SesionActiva.getNombre());
+        UsuarioDTO usuario = SesionActiva.getUsuarioDTO();
+        JLabel labelSaludo = new JLabel();
         labelSaludo.setBounds(40, 30, 300, 30);
         labelSaludo.setForeground(Color.WHITE);
         labelSaludo.setFont(FuenteUtil.cargarOrbitronBold(20f));
+        if (usuario != null && usuario.getNombre() != null) {
+            labelSaludo.setText("Hi " + usuario.getNombre());
+        } else {
+            labelSaludo.setText("Hi user");
+        }
         panelFijoArriba.add(labelSaludo);
 
         JPanel lineaNeon = new JPanel() {

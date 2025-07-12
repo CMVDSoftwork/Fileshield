@@ -61,6 +61,10 @@ public class SesionActiva {
         return usuarioDTO;
     }
 
+    public static void setUsuarioDTO(UsuarioDTO usuarioDTO) {
+        SesionActiva.usuarioDTO = usuarioDTO;
+    }
+
     public static void setTokenEnlacePendiente(String token) {
         tokenEnlacePendiente = token;
     }

@@ -83,4 +83,5 @@ public class UsuarioDTO {
         this.claveCifDesPersonal = claveCifDesPersonal;
         this.contrasena = contrasena;
     }
+
 }
